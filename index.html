@@ -87,8 +87,9 @@
             function displayDeviceList() {
                 var deviceListHtml = '';
                 deviceList.forEach(function(device, index) {
-                    var statusIndicatorClass = device.ipAddress ? 'online' : 'offline';
-                    deviceListHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' | ' + device.ipAddress + ' <span class="status-indicator ' + statusIndicatorClass + '"></span></p>';
+                    if (device.deviceName === navigator.userAgent) {
+                        deviceListHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' <span class="status-indicator online"></span></p>';
+                    }
                 });
                 document.getElementById('deviceList').innerHTML = deviceListHtml;
             }
@@ -99,22 +100,12 @@
             // Check if the device information already exists
             var existingDeviceIndex = deviceList.findIndex(device => device.deviceName === deviceName);
             if (existingDeviceIndex === -1) {
-                // Get IP address
-                fetch('https://api.ipify.org?format=json')
-                    .then(response => response.json())
-                    .then(data => {
-                        var ipAddress = data.ip;
-                        var deviceInfo = { deviceName: deviceName, ipAddress: ipAddress };
-                        // Add current device information to the list
-                        deviceList.push(deviceInfo);
-                        // Save updated device list to local storage
-                        localStorage.setItem('deviceList', JSON.stringify(deviceList));
-                        // Display device list
-                        displayDeviceList();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching IP address:', error);
-                    });
+                // Add current device information to the list
+                deviceList.push({ deviceName: deviceName });
+                // Save updated device list to local storage
+                localStorage.setItem('deviceList', JSON.stringify(deviceList));
+                // Display device list
+                displayDeviceList();
             } else {
                 // Display stored device information
                 displayDeviceList();
