@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+
+        .delete-button, .upload-button {
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .delete-button:hover, .upload-button:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Saved Information</h1>
+        <div id="savedInfo"></div>
+        <button id="deleteButton" class="delete-button">Delete Information</button>
+        <input type="file" id="fileInput" style="display:none;">
+        <button id="uploadButton" class="upload-button">Upload File</button>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Retrieve saved device information from local storage
+            var savedInfo = JSON.parse(localStorage.getItem('deviceList')) || [];
+
+            // Display saved information
+            function displaySavedInfo() {
+                var savedInfoHtml = '';
+                savedInfo.slice().reverse().forEach(function(device, index) {
+                    savedInfoHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' <span class="status-indicator online"></span></p>';
+                });
+                document.getElementById('savedInfo').innerHTML = savedInfoHtml;
+            }
+
+            // Display saved information on page load
+            displaySavedInfo();
+
+            // Add event listener to delete button
+            document.getElementById('deleteButton').addEventListener('click', function() {
+                // Remove stored device information
+                localStorage.removeItem('deviceList');
+                // Clear displayed saved information
+                document.getElementById('savedInfo').innerHTML = '';
+            });
+
+            // Add event listener to upload button
+            document.getElementById('uploadButton').addEventListener('click', function() {
+                // Trigger file input click event
+                document.getElementById('fileInput').click();
+            });
+
+            // Add event listener to file input change event
+            document.getElementById('fileInput').addEventListener('change', function() {
+                // Handle file upload logic here
+                var file = this.files[0];
+                console.log('Selected file:', file);
+                // You can perform further actions with the selected file
+                // For example, upload it to a server or process it locally
+            });
+        };
+    </script>
+</body>
+</html>
