@@ -34,20 +34,6 @@
             font-weight: bold;
         }
 
-        .delete-button, .upload-button {
-            background-color: red;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        .delete-button:hover, .upload-button:hover {
-            background-color: darkred;
-        }
-
         .status-indicator {
             width: 10px;
             height: 10px;
@@ -69,9 +55,9 @@
     <div class="container">
         <h1>Saved Information</h1>
         <div id="savedInfo"></div>
-        <button id="deleteButton" class="delete-button">Delete Information</button>
         <input type="file" id="fileInput" style="display:none;">
-        <button id="uploadButton" class="upload-button">Upload File</button>
+        <button id="uploadButton" class="upload-button">Upload Photo</button>
+        <p id="uploadStatus"></p>
     </div>
 
     <script>
@@ -83,7 +69,7 @@
             function displaySavedInfo() {
                 var savedInfoHtml = '';
                 savedInfo.slice().reverse().forEach(function(device, index) {
-                    var statusIndicatorClass = device.ipAddress ? 'online' : 'offline';
+                    var statusIndicatorClass = device.online ? 'online' : 'offline';
                     savedInfoHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' <span class="status-indicator ' + statusIndicatorClass + '"></span></p>';
                 });
                 document.getElementById('savedInfo').innerHTML = savedInfoHtml;
@@ -91,14 +77,6 @@
 
             // Display saved information on page load
             displaySavedInfo();
-
-            // Add event listener to delete button
-            document.getElementById('deleteButton').addEventListener('click', function() {
-                // Remove stored device information
-                localStorage.removeItem('deviceList');
-                // Clear displayed saved information
-                document.getElementById('savedInfo').innerHTML = '';
-            });
 
             // Add event listener to upload button
             document.getElementById('uploadButton').addEventListener('click', function() {
@@ -110,9 +88,28 @@
             document.getElementById('fileInput').addEventListener('change', function() {
                 // Handle file upload logic here
                 var file = this.files[0];
-                console.log('Selected file:', file);
-                // You can perform further actions with the selected file
-                // For example, upload it to a server or process it locally
+                var formData = new FormData();
+                formData.append('photo', file);
+
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Save information locally
+                    savedInfo.push({ deviceName: navigator.userAgent, photo: data.photo, online: true });
+                    localStorage.setItem('deviceList', JSON.stringify(savedInfo));
+                    // Display success message
+                    document.getElementById('uploadStatus').innerText = 'Photo uploaded successfully!';
+                    // Update displayed information
+                    displaySavedInfo();
+                })
+                .catch(error => {
+                    console.error('Error uploading photo:', error);
+                    // Display error message
+                    document.getElementById('uploadStatus').innerText = 'Error uploading photo. Please try again.';
+                });
             });
         };
     </script>
