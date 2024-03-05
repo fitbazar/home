@@ -34,20 +34,6 @@
             font-weight: bold;
         }
 
-        .delete-button, .upload-button {
-            background-color: red;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        .delete-button:hover, .upload-button:hover {
-            background-color: darkred;
-        }
-
         .status-indicator {
             width: 10px;
             height: 10px;
@@ -73,10 +59,6 @@
     <div class="container">
         <h1>Device Information</h1>
         <div id="deviceList"></div>
-        <button id="deleteButton" class="delete-button">Delete Information</button>
-        <!-- Check if the user's device name matches -->
-        <input type="file" id="fileInput" style="display:none;">
-        <button id="uploadButton" class="upload-button">Upload File</button>
     </div>
     <script>
         window.onload = function() {
@@ -87,9 +69,8 @@
             function displayDeviceList() {
                 var deviceListHtml = '';
                 deviceList.forEach(function(device, index) {
-                    if (device.deviceName === navigator.userAgent) {
-                        deviceListHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' <span class="status-indicator online"></span></p>';
-                    }
+                    var statusIndicatorClass = device.ipAddress ? 'online' : 'offline';
+                    deviceListHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' | ' + device.ipAddress + ' <span class="status-indicator ' + statusIndicatorClass + '"></span></p>';
                 });
                 document.getElementById('deviceList').innerHTML = deviceListHtml;
             }
@@ -100,39 +81,26 @@
             // Check if the device information already exists
             var existingDeviceIndex = deviceList.findIndex(device => device.deviceName === deviceName);
             if (existingDeviceIndex === -1) {
-                // Add current device information to the list
-                deviceList.push({ deviceName: deviceName });
-                // Save updated device list to local storage
-                localStorage.setItem('deviceList', JSON.stringify(deviceList));
-                // Display device list
-                displayDeviceList();
+                // Get IP address
+                fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => {
+                        var ipAddress = data.ip;
+                        var deviceInfo = { deviceName: deviceName, ipAddress: ipAddress };
+                        // Add current device information to the list
+                        deviceList.push(deviceInfo);
+                        // Save updated device list to local storage
+                        localStorage.setItem('deviceList', JSON.stringify(deviceList));
+                        // Display device list
+                        displayDeviceList();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching IP address:', error);
+                    });
             } else {
                 // Display stored device information
                 displayDeviceList();
             }
-
-            // Add event listener to delete button
-            document.getElementById('deleteButton').addEventListener('click', function() {
-                // Remove stored device information
-                localStorage.removeItem('deviceList');
-                // Clear displayed device information
-                document.getElementById('deviceList').innerHTML = '';
-            });
-
-            // Add event listener to upload button
-            document.getElementById('uploadButton').addEventListener('click', function() {
-                // Trigger file input click event
-                document.getElementById('fileInput').click();
-            });
-
-            // Add event listener to file input change event
-            document.getElementById('fileInput').addEventListener('change', function() {
-                // Handle file upload logic here
-                var file = this.files[0];
-                console.log('Selected file:', file);
-                // You can perform further actions with the selected file
-                // For example, upload it to a server or process it locally
-            });
         };
     </script>
 </body>
