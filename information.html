@@ -47,6 +47,22 @@
         .delete-button:hover, .upload-button:hover {
             background-color: darkred;
         }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .offline {
+            background-color: red;
+        }
+
+        .online {
+            background-color: green;
+        }
     </style>
 </head>
 <body>
@@ -67,7 +83,8 @@
             function displaySavedInfo() {
                 var savedInfoHtml = '';
                 savedInfo.slice().reverse().forEach(function(device, index) {
-                    savedInfoHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' <span class="status-indicator online"></span></p>';
+                    var statusIndicatorClass = device.ipAddress ? 'online' : 'offline';
+                    savedInfoHtml += '<p><strong>Device ' + (index + 1) + ':</strong> ' + device.deviceName + ' <span class="status-indicator ' + statusIndicatorClass + '"></span></p>';
                 });
                 document.getElementById('savedInfo').innerHTML = savedInfoHtml;
             }
